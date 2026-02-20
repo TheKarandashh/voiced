@@ -4761,9 +4761,11 @@
                 // Получаем количество сообщений
                 let messageCount = 0;
                 if (currentRoom) {
-                    const channelsSnapshot = await db.collection(`rooms/${currentRoom.id}/channels`).listDocuments();
-                    for (const channelRef of channelsSnapshot) {
-                        const messagesSnapshot = await db.collection(channelRef.path + '/messages').where('authorId', '==', userId).get();
+                    const channelsSnapshot = await db.collection(`rooms/${currentRoom.id}/channels`).get();
+                    for (const channelDoc of channelsSnapshot.docs) {
+                        const messagesSnapshot = await db.collection(`rooms/${currentRoom.id}/channels/${channelDoc.id}/messages`)
+                            .where('authorId', '==', userId)
+                            .get();
                         messageCount += messagesSnapshot.size;
                     }
                 }
