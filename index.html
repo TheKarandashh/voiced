@@ -3720,7 +3720,7 @@
             document.getElementById('roomInfoName').textContent = roomData.name || 'Новая комната';
             document.getElementById('roomInfoId').textContent = roomId;
             document.getElementById('roomInfoType').textContent = roomData.type === 'public' ? 'Публичная' : 'Приватная';
-            document.getElementById('roomInfoDate').textContent = roomData.createdAt ? new Date(roomData.createdAt.toDate()).toLocaleDateString() : new Date().toLocaleDateString();
+            document.getElementById('roomInfoDate').textContent = roomData.createdAt && typeof roomData.createdAt.toDate === 'function' ? new Date(roomData.createdAt.toDate()).toLocaleDateString() : new Date().toLocaleDateString();
             document.getElementById('roomInfoDescription').textContent = roomData.description || 'Нет описания';
 
             // Загружаем аватар если есть
@@ -3989,7 +3989,7 @@
             messageElement.dataset.messageId = message.id;
 
             const isAuthor = message.authorId === currentUser?.uid;
-            const time = message.timestamp ? new Date(message.timestamp.toDate()).toLocaleTimeString() : message.time || 'только что';
+            const time = message.timestamp && typeof message.timestamp.toDate === 'function' ? new Date(message.timestamp.toDate()).toLocaleTimeString() : message.time || 'только что';
 
             let contentHtml = '';
             if (message.type === 'text') {
@@ -4755,7 +4755,7 @@
 
                 document.getElementById('userProfileBio').textContent = userData.bio || 'Нет описания';
 
-                const joinDate = userData.createdAt ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Неизвестно';
+                const joinDate = userData.createdAt && typeof userData.createdAt.toDate === 'function' ? new Date(userData.createdAt.toDate()).toLocaleDateString() : 'Неизвестно';
                 document.getElementById('userProfileJoinDate').textContent = joinDate;
 
                 // Получаем количество сообщений
@@ -5601,4 +5601,3 @@
     </script>
 </body>
 </html>
-
