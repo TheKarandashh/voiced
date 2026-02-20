@@ -4128,48 +4128,57 @@
             return false;
         }
 
-        // Загрузка и отправка файла
-        async function uploadAndSendFile(file) {
-            showNotification(`Загрузка ${file.name}...`, 'info');
+            // Загрузка и отправка файла
+            async function uploadAndSendFile(file) {
+                showNotification(`Загрузка ${file.name}...`, 'info');
 
-            const fileRef = storage.ref(`rooms/${currentRoom.id}/files/${Date.now()}_${file.name}`);
-            const uploadTask = fileRef.put(file);
+                try {
+                    const fileRef = storage.ref(`rooms/${currentRoom.id}/files/${Date.now()}_${file.name}`);
+                    const uploadTask = fileRef.put(file);
 
-            return new Promise((resolve, reject) => {
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    },
-                    (error) => {
-                        console.error('Ошибка загрузки файла:', error);
-                        showNotification('Ошибка загрузки файла', 'error');
-                        reject(error);
-                    },
-                    async () => {
-                        const url = await uploadTask.snapshot.ref.getDownloadURL();
+                    await new Promise((resolve, reject) => {
+                        uploadTask.on('state_changed',
+                            (snapshot) => {
+                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            },
+                            (error) => {
+                                console.error('Ошибка загрузки файла:', error);
+                                showNotification('Ошибка загрузки файла (проверьте CORS в Firebase Console)', 'error');
+                                reject(error);
+                            },
+                            async () => {
+                                const url = await uploadTask.snapshot.ref.getDownloadURL();
 
-                        let type = 'file';
-                        if (file.type.startsWith('image/')) type = 'image';
-                        else if (file.type.startsWith('video/')) type = 'video';
-                        else if (file.type.startsWith('audio/')) type = 'audio';
+                                let type = 'file';
+                                if (file.type.startsWith('image/')) type = 'image';
+                                else if (file.type.startsWith('video/')) type = 'video';
+                                else if (file.type.startsWith('audio/')) type = 'audio';
 
-                        const message = {
-                            author: currentUser.displayName || 'Пользователь',
-                            authorId: currentUser.uid,
-                            authorPhotoURL: currentUser.photoURL || '',
-                            url: url,
-                            fileName: file.name,
-                            fileSize: file.size,
-                            type: type,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        };
+                                const message = {
+                                    author: currentUser.displayName || 'Пользователь',
+                                    authorId: currentUser.uid,
+                                    authorPhotoURL: currentUser.photoURL || '',
+                                    url: url,
+                                    fileName: file.name,
+                                    fileSize: file.size,
+                                    type: type,
+                                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                };
 
-                        await db.collection(`rooms/${currentRoom.id}/channels/${currentChannel.id}/messages`).add(message);
-                        resolve();
+                                await db.collection(`rooms/${currentRoom.id}/channels/${currentChannel.id}/messages`).add(message);
+                                resolve();
+                            }
+                        );
+                    });
+                } catch (error) {
+                    console.error('Критическая ошибка загрузки:', error);
+                    if (error.code === 'storage/unauthorized') {
+                        showNotification('Ошибка: Нет прав на загрузку. Проверьте правила Firebase Storage.', 'error');
+                    } else if (error.message.includes('CORS')) {
+                        showNotification('Ошибка CORS: Нужно настроить доступ в Firebase Console.', 'error');
                     }
-                );
-            });
-        }
+                }
+            }
 
         // Прикрепление файла
         function attachFile() {
