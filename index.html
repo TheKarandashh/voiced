@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voiced — Вход</title>
+    <title>Voiced — Голосовые комнаты</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <!-- Firebase SDK (Compat version для простоты) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
     
     <style>
         * {
@@ -20,35 +19,116 @@
         }
         
         body {
-            background-color: #0a0a0c;
+            background: radial-gradient(circle at 20% 30%, #1a2f1a, #0a0a0c 70%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+        }
+
+        /* Аккаунт в правом верхнем углу (стиль Voiced) */
+        .user-account {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(17, 18, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 12px 20px;
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .user-account:hover {
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .user-phone {
+            color: #8e9297;
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #8e9297;
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.2s;
+            padding: 0 8px;
+        }
+
+        .logout-btn:hover {
+            color: #ef4444;
+        }
+
+        /* Страница входа (стиль Voiced) */
+        #loginPage {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .login-card {
-            background-color: #111214;
+            background: rgba(17, 18, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
             width: 100%;
             max-width: 1000px;
             min-height: 600px;
             border-radius: 32px;
-            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), 0 0 30px rgba(16, 185, 129, 0.1);
             display: flex;
             overflow: hidden;
         }
 
         .brand-section {
             flex: 1;
-            background: linear-gradient(145deg, #0d0f11 0%, #1a1c20 100%);
+            background: linear-gradient(145deg, rgba(13, 15, 17, 0.9), rgba(26, 28, 32, 0.9));
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 48px 32px;
             text-align: center;
-            border-right: 1px solid #2a2d33;
+            border-right: 1px solid rgba(16, 185, 129, 0.2);
+            backdrop-filter: blur(8px);
         }
 
         .mic-container {
@@ -61,15 +141,17 @@
         .brand-section i {
             font-size: 120px;
             color: #10b981;
+            filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.5));
             background: transparent;
             padding: 0;
             border: none;
-            transition: color 0.5s ease;
+            transition: all 0.5s ease;
             display: block;
         }
 
         .mic-container.mic-muted i {
             color: #ef4444;
+            filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.5));
         }
 
         .strike-line {
@@ -97,6 +179,7 @@
             stroke-dasharray: 200;
             stroke-dashoffset: 200;
             transition: stroke-dashoffset 0.6s ease-in-out;
+            filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
         }
 
         .mic-container.mic-muted .strike-line path {
@@ -109,6 +192,7 @@
             color: white;
             letter-spacing: 2px;
             margin-bottom: 16px;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
         }
 
         .brand-section h1 span {
@@ -124,7 +208,8 @@
 
         .auth-section {
             flex: 1;
-            background-color: #0c0d0f;
+            background: rgba(12, 13, 15, 0.8);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -136,6 +221,7 @@
             font-weight: 600;
             color: white;
             margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
         }
 
         .welcome-subtext {
@@ -156,15 +242,16 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            background-color: #1e1f24;
-            border: 2px solid #3a3c44;
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
             color: white;
             font-size: 18px;
             font-weight: 500;
             padding: 16px 24px;
-            border-radius: 14px;
+            border-radius: 40px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             width: 100%;
         }
 
@@ -182,10 +269,10 @@
         }
 
         .auth-btn:hover {
-            background-color: #2a2c33;
             border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.3);
+            background: rgba(42, 44, 51, 0.8);
         }
 
         .divider {
@@ -201,7 +288,7 @@
         .divider::after {
             content: '';
             flex: 1;
-            border-bottom: 1px solid #2d2f36;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .divider span {
@@ -220,21 +307,23 @@
             text-decoration: none;
             font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .footer-links a:hover {
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
             text-decoration: underline;
         }
 
-        /* Модальные окна */
+        /* Модальные окна в стиле Voiced */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -250,12 +339,14 @@
         }
 
         .modal-content {
-            background-color: #1a1c20;
+            background: rgba(26, 28, 32, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
             width: 90%;
-            max-width: 450px;
+            max-width: 500px;
             border-radius: 28px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
-            border: 1px solid #2d2f36;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.1);
             position: relative;
             overflow: hidden;
             transform: scale(0.9) translateY(20px);
@@ -289,7 +380,7 @@
             display: inline-block;
             font-size: 40px;
             color: #8e9297;
-            transition: color 0.3s;
+            transition: all 0.3s;
             line-height: 1;
             width: 40px;
             height: 40px;
@@ -299,6 +390,7 @@
         .modal-close:hover .close-icon {
             color: #10b981;
             animation: spinCross 0.5s ease;
+            text-shadow: 0 0 15px #10b981;
         }
 
         @keyframes spinCross {
@@ -316,6 +408,7 @@
             margin-bottom: 24px;
             font-weight: 600;
             padding-right: 30px;
+            text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
         }
 
         .modal-title span {
@@ -327,47 +420,28 @@
             padding-right: 0;
         }
 
-        .step {
-            transition: opacity 0.3s ease;
-        }
-
-        .step.hidden {
-            display: none;
-        }
-
-        .phone-input-container {
-            margin-bottom: 24px;
-        }
-
-        .phone-input-label {
-            color: #b5bac1;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .phone-input-field {
+        /* Поля ввода в стиле Voiced */
+        .phone-input-field, .settings-input, .settings-textarea, .settings-select, .room-id-input {
             width: 100%;
             padding: 16px 18px;
-            background-color: #1e1f24;
-            border: 2px solid #3a3c44;
-            border-radius: 16px;
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 40px;
             color: white;
-            font-size: 18px;
+            font-size: 16px;
             outline: none;
             transition: all 0.2s ease;
         }
 
-        .phone-input-field:focus {
+        .phone-input-field:focus, .settings-input:focus, .settings-textarea:focus, .settings-select:focus, .room-id-input:focus {
             border-color: #10b981;
-        }
-
-        .phone-input-field::placeholder {
-            color: #5a5f66;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
         }
 
         .phone-input-field.error {
             border-color: #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
             animation: shake 0.3s ease;
         }
 
@@ -377,142 +451,674 @@
             75% { transform: translateX(5px); }
         }
 
-        .code-input-container {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .code-phone-display {
-            color: #10b981;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            padding: 12px;
-            background-color: rgba(16, 185, 129, 0.1);
-            border-radius: 40px;
-            text-align: center;
-        }
-
-        .code-inputs {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .code-input {
-            width: 65px;
-            height: 75px;
-            background-color: #1e1f24;
-            border: 2px solid #3a3c44;
-            border-radius: 16px;
-            color: white;
-            font-size: 36px;
-            font-weight: 600;
-            text-align: center;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .code-input:focus {
-            border-color: #10b981;
-        }
-
-        .code-input.error {
-            border-color: #ef4444;
-            color: #ef4444;
-            animation: shake 0.3s ease;
-        }
-
-        .code-resend {
-            color: #8e9297;
-            font-size: 14px;
-            margin-top: 16px;
-        }
-
-        .code-resend a {
-            color: #10b981;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .code-resend a:hover {
-            text-decoration: underline;
-        }
-
-        .code-resend a.disabled {
-            opacity: 0.5;
-            pointer-events: none;
-            cursor: not-allowed;
-        }
-
         .submit-btn {
             width: 100%;
             padding: 16px;
-            background-color: #10b981;
-            color: white;
+            background: linear-gradient(135deg, #10b981, #059669);
             border: none;
             border-radius: 40px;
+            color: white;
             font-size: 18px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 8px;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
         }
 
         .submit-btn:hover:not(:disabled) {
-            background-color: #0d9e6b;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
         }
 
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #8e9297;
+        .cancel-btn {
+            flex: 1;
+            padding: 16px;
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 40px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
-            margin-bottom: 20px;
-            transition: color 0.2s;
-            font-size: 14px;
+            transition: all 0.3s ease;
         }
 
-        .back-link:hover {
+        .cancel-btn:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Страница с комнатами */
+        #roomsPage {
+            width: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rooms-card {
+            background: rgba(17, 18, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), 0 0 30px rgba(16, 185, 129, 0.1);
+            padding: 48px;
+        }
+
+        .rooms-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .rooms-header h1 {
+            color: white;
+            font-size: 48px;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+        }
+
+        .rooms-header h1 span {
             color: #10b981;
         }
 
-        .back-link i {
+        .rooms-title {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .rooms-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .room-action-btn {
+            flex: 1;
+            max-width: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 24px;
+            padding: 32px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .room-action-btn:hover {
+            border-color: #10b981;
+            transform: translateY(-5px);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+        }
+
+        .room-action-btn i {
+            font-size: 48px;
+            color: #10b981;
+            filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.5));
+        }
+
+        .room-action-btn span {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .room-action-btn small {
+            color: #8e9297;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Настройки комнаты */
+        .room-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            background: rgba(45, 47, 54, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-preview i {
+            font-size: 32px;
+            color: #8e9297;
+        }
+
+        .avatar-upload-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 40px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .avatar-upload-btn:hover {
+            border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .settings-label {
+            color: #b5bac1;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .settings-textarea {
+            min-height: 100px;
+            resize: vertical;
+            border-radius: 24px;
+        }
+
+        .room-id-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .generate-id-btn, .copy-id-btn {
+            padding: 14px 20px;
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 40px;
+            color: #10b981;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .generate-id-btn:hover, .copy-id-btn:hover {
+            border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+            background: rgba(42, 44, 51, 0.8);
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .settings-row .settings-field {
+            flex: 1;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        /* Страница комнаты в стиле Voiced */
+        #roomPage {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #1a2f1a, #0a0a0c 70%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 2000;
+        }
+
+        .room-container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* Левая панель - серверы */
+        .servers-panel {
+            width: 72px;
+            background: rgba(12, 13, 15, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0;
+            gap: 8px;
+            border-right: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .server-icon:hover {
+            border-radius: 16px;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+        }
+
+        .server-icon.home {
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            margin-bottom: 0;
+        }
+
+        .server-divider {
+            width: 32px;
+            height: 2px;
+            background: rgba(16, 185, 129, 0.2);
+            margin: 8px 0;
+        }
+
+        /* Левая панель - каналы */
+        .channels-panel {
+            width: 240px;
+            background: rgba(17, 18, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .room-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .room-header .room-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .room-header .room-info h3 {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .room-header .room-info p {
+            color: #8e9297;
+            font-size: 12px;
+        }
+
+        .back-to-rooms {
+            margin-left: auto;
+            color: #8e9297;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-to-rooms:hover {
+            color: #10b981;
+            text-shadow: 0 0 15px #10b981;
+        }
+
+        .channels-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .channel-category {
+            margin-bottom: 16px;
+        }
+
+        .category-header {
+            color: #8e9297;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .category-header i {
+            font-size: 10px;
+        }
+
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            color: #8e9297;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
+        }
+
+        .channel-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            color: white;
+        }
+
+        .channel-item.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .channel-item i {
+            font-size: 14px;
+            width: 20px;
+        }
+
+        /* Средняя панель - чат */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(17, 18, 20, 0.5);
+            backdrop-filter: blur(8px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-author {
+            color: white;
+            font-weight: 600;
             font-size: 16px;
         }
 
+        .message-time {
+            color: #8e9297;
+            font-size: 12px;
+        }
+
+        .message-text {
+            color: #d1d5db;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Стеклянное поле ввода */
+        .chat-input-container {
+            padding: 20px;
+            background: rgba(17, 18, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(30, 31, 36, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 40px;
+            padding: 4px 4px 4px 20px;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: #5a5f66;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .chat-action-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: #8e9297;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .chat-action-btn:hover {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            text-shadow: 0 0 15px #10b981;
+        }
+
+        /* Правая панель - участники */
+        .members-panel {
+            width: 240px;
+            background: rgba(17, 18, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .members-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            color: #8e9297;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .members-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .member-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            position: relative;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .member-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(17, 18, 20, 0.9);
+        }
+
+        .status-online {
+            background-color: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .status-idle {
+            background-color: #fbbf24;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+
+        .status-dnd {
+            background-color: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .member-role {
+            color: #8e9297;
+            font-size: 12px;
+        }
+
+        /* Уведомления */
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
             padding: 16px 24px;
-            border-radius: 12px;
+            border-radius: 40px;
+            background: rgba(26, 28, 32, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
             color: white;
             font-weight: 500;
             z-index: 2000;
             animation: slideIn 0.3s ease;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(16, 185, 129, 0.1);
         }
 
         .notification.success {
-            background-color: #10b981;
+            border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
         }
 
         .notification.error {
-            background-color: #ef4444;
-        }
-
-        .notification.info {
-            background-color: #3b82f6;
+            border-color: #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
         }
 
         @keyframes slideIn {
@@ -532,12 +1138,16 @@
             height: 20px;
             border: 3px solid rgba(255,255,255,.3);
             border-radius: 50%;
-            border-top-color: white;
+            border-top-color: #10b981;
             animation: spin 1s ease-in-out infinite;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -548,7 +1158,7 @@
             
             .brand-section {
                 border-right: none;
-                border-bottom: 1px solid #2a2d33;
+                border-bottom: 1px solid rgba(16, 185, 129, 0.2);
                 padding: 40px 20px;
             }
             
@@ -564,49 +1174,220 @@
                 font-size: 56px;
             }
 
-            .code-input {
-                width: 55px;
-                height: 65px;
-                font-size: 32px;
+            .rooms-card {
+                padding: 32px 20px;
+            }
+
+            .rooms-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .room-action-btn {
+                max-width: 100%;
+            }
+
+            .settings-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .user-account {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+            }
+
+            .channels-panel, .members-panel {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <div class="brand-section">
-            <div id="micContainer" class="mic-container" onclick="toggleMic()">
-                <i class="fas fa-microphone-alt"></i>
-                <div class="strike-line">
-                    <svg viewBox="0 0 120 120" preserveAspectRatio="none">
-                        <path d="M 10 10 L 110 110" />
-                    </svg>
+    <!-- Аккаунт в правом верхнем углу -->
+    <div class="user-account" id="userAccount" style="display: none;">
+        <div class="user-avatar" id="userAvatar"></div>
+        <div class="user-details">
+            <span class="user-name" id="userName">Пользователь</span>
+            <span class="user-phone" id="userPhone"></span>
+        </div>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+
+    <!-- Страница входа -->
+    <div id="loginPage">
+        <div class="login-card">
+            <div class="brand-section">
+                <div id="micContainer" class="mic-container" onclick="toggleMic()">
+                    <i class="fas fa-microphone-alt"></i>
+                    <div class="strike-line">
+                        <svg viewBox="0 0 120 120" preserveAspectRatio="none">
+                            <path d="M 10 10 L 110 110" />
+                        </svg>
+                    </div>
+                </div>
+                <h1>Voiced<span>.</span></h1>
+                <div class="brand-tagline">
+                    Приватность. Удобность. Функциональность.
                 </div>
             </div>
-            <h1>Voiced<span>.</span></h1>
-            <div class="brand-tagline">
-                Приватность. Удобность. Функциональность.
+
+            <div class="auth-section">
+                <div class="welcome-text">Добро пожаловать</div>
+                <div class="welcome-subtext">Выберите способ входа, чтобы продолжить</div>
+
+                <div class="auth-buttons">
+                    <button class="auth-btn" onclick="signInWithGoogle()">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <div class="divider"><span>или</span></div>
+                    <button class="auth-btn" onclick="openPhoneModal()">
+                        <i class="fas fa-phone-alt"></i> Номер телефона
+                    </button>
+                </div>
+
+                <div class="footer-links">
+                    <span>Нажимая «Войти», Вы принимаете <a onclick="openTermsModal()">условия</a></span>
+                    <br>
+                    <span style="font-size: 12px;">© Voiced 2025</span>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="auth-section">
-            <div class="welcome-text">Добро пожаловать</div>
-            <div class="welcome-subtext">Выберите способ входа, чтобы продолжить</div>
-
-            <div class="auth-buttons">
-                <button class="auth-btn" onclick="signInWithGoogle()">
-                    <i class="fab fa-google"></i> Google
-                </button>
-                <div class="divider"><span>или</span></div>
-                <button class="auth-btn" onclick="openPhoneModal()">
-                    <i class="fas fa-phone-alt"></i> Номер телефона
-                </button>
+    <!-- Страница с комнатами -->
+    <div id="roomsPage">
+        <div class="rooms-card">
+            <div class="rooms-header">
+                <h1>Voiced<span>.</span></h1>
             </div>
 
-            <div class="footer-links">
-                <span>Нажимая «Войти», Вы принимаете <a onclick="openTermsModal()">условия</a></span>
-                <br>
-                <span style="font-size: 12px;">© Voiced 2025</span>
+            <h2 class="rooms-title">Голосовые комнаты</h2>
+
+            <div class="rooms-actions">
+                <!-- Кнопка создания комнаты -->
+                <div class="room-action-btn" onclick="openCreateRoomModal()">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Создать комнату</span>
+                    <small>Создайте новую голосовую комнату</small>
+                </div>
+
+                <!-- Кнопка входа в комнату -->
+                <div class="room-action-btn" onclick="openJoinRoomModal()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Войти в комнату</span>
+                    <small>Присоединитесь к существующей комнате</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Страница комнаты -->
+    <div id="roomPage">
+        <div class="room-container">
+            <!-- Левая панель - серверы -->
+            <div class="servers-panel">
+                <div class="server-icon home" onclick="leaveRoom()">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="server-divider"></div>
+                <div class="server-icon">
+                    <span>G</span>
+                </div>
+                <div class="server-icon">
+                    <span>🎮</span>
+                </div>
+                <div class="server-icon">
+                    <span>🎵</span>
+                </div>
+            </div>
+
+            <!-- Левая панель - каналы -->
+            <div class="channels-panel">
+                <div class="room-header">
+                    <div class="room-avatar" id="currentRoomAvatar">
+                        <i class="fas fa-microphone-alt"></i>
+                    </div>
+                    <div class="room-info">
+                        <h3 id="currentRoomName">Название комнаты</h3>
+                        <p id="currentRoomId">ID: ABC123</p>
+                    </div>
+                    <div class="back-to-rooms" onclick="leaveRoom()">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+
+                <div class="channels-container">
+                    <!-- Текстовые каналы -->
+                    <div class="channel-category">
+                        <div class="category-header">
+                            <span><i class="fas fa-chevron-down"></i> ТЕКСТОВЫЕ КАНАЛЫ</span>
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="channel-item active">
+                            <i class="fas fa-hashtag"></i>
+                            <span>общий</span>
+                        </div>
+                        <div class="channel-item">
+                            <i class="fas fa-hashtag"></i>
+                            <span>приветствия</span>
+                        </div>
+                    </div>
+
+                    <!-- Голосовые каналы -->
+                    <div class="channel-category">
+                        <div class="category-header">
+                            <span><i class="fas fa-chevron-down"></i> ГОЛОСОВЫЕ КАНАЛЫ</span>
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="channel-item">
+                            <i class="fas fa-volume-up"></i>
+                            <span>Общий</span>
+                        </div>
+                        <div class="channel-item">
+                            <i class="fas fa-volume-up"></i>
+                            <span>Игровой</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Средняя панель - чат -->
+            <div class="chat-panel">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Сообщения будут добавляться сюда -->
+                </div>
+
+                <!-- Стеклянное поле ввода -->
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="Напишите сообщение...">
+                        <div class="chat-actions">
+                            <button class="chat-action-btn" onclick="openEmojiPicker()">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                            <button class="chat-action-btn" onclick="attachFile()">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="chat-action-btn" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая панель - участники -->
+            <div class="members-panel">
+                <div class="members-header">
+                    УЧАСТНИКИ — <span id="membersCount">1</span>
+                </div>
+                <div class="members-list" id="membersList">
+                    <!-- Участники будут добавляться сюда -->
+                </div>
             </div>
         </div>
     </div>
@@ -667,35 +1448,255 @@
         </div>
     </div>
 
+    <!-- Модальное окно для входа в комнату -->
+    <div id="joinRoomModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close"><span class="close-icon">×</span></button>
+            <div class="modal-body">
+                <h2 class="modal-title center">Войти в <span>комнату</span></h2>
+                <div class="phone-input-container">
+                    <label class="phone-input-label">ID комнаты (6 символов)</label>
+                    <input type="text" id="roomIdJoin" class="phone-input-field" placeholder="Например: ABC123" maxlength="6" oninput="this.value = this.value.toUpperCase()">
+                </div>
+                <button class="submit-btn" onclick="joinRoom()">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания комнаты -->
+    <div id="createRoomModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="modal-close"><span class="close-icon">×</span></button>
+            <div class="modal-body">
+                <h2 class="modal-title">Настройки <span>комнаты</span></h2>
+                
+                <div class="room-settings">
+                    <!-- Аватар комнаты -->
+                    <div class="avatar-upload">
+                        <div class="avatar-preview" id="roomAvatarPreview">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <label class="avatar-upload-btn">
+                            <i class="fas fa-upload"></i> Загрузить аватар
+                            <input type="file" id="roomAvatar" accept="image/*" onchange="previewRoomAvatar(this)">
+                        </label>
+                    </div>
+
+                    <!-- Название комнаты -->
+                    <div class="settings-field">
+                        <label class="settings-label">Название комнаты</label>
+                        <input type="text" id="roomName" class="settings-input" placeholder="Введите название">
+                    </div>
+
+                    <!-- Описание комнаты -->
+                    <div class="settings-field">
+                        <label class="settings-label">Описание</label>
+                        <textarea id="roomDescription" class="settings-textarea" placeholder="Опишите вашу комнату"></textarea>
+                    </div>
+
+                    <!-- Максимальное количество игроков и приватность -->
+                    <div class="settings-row">
+                        <div class="settings-field">
+                            <label class="settings-label">Макс. участников</label>
+                            <select id="roomMaxPlayers" class="settings-select">
+                                <option value="2">2 человека</option>
+                                <option value="4">4 человека</option>
+                                <option value="8">8 человек</option>
+                                <option value="16">16 человек</option>
+                                <option value="32">32 человека</option>
+                                <option value="64">64 человека</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-field">
+                            <label class="settings-label">Тип комнаты</label>
+                            <select id="roomType" class="settings-select">
+                                <option value="public">Публичная</option>
+                                <option value="private">Приватная</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- ID комнаты с кнопкой копирования -->
+                    <div class="settings-field">
+                        <label class="settings-label">ID комнаты</label>
+                        <div class="room-id-container">
+                            <input type="text" id="roomId" class="room-id-input" placeholder="Сгенерируется автоматически" readonly>
+                            <button class="generate-id-btn" onclick="generateRoomId()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="copy-id-btn" onclick="copyRoomId()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="cancel-btn" onclick="closeModal('createRoomModal')">Отмена</button>
+                    <button class="submit-btn" onclick="createRoom()">Создать комнату</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для reCAPTCHA -->
+    <div id="recaptcha-container"></div>
+
     <div id="notification" style="display: none;"></div>
 
     <script>
-        // Firebase конфигурация (ваша)
+        // Firebase конфигурация
         const firebaseConfig = {
             apiKey: "AIzaSyBzkawq3-nfIsswtXD2zR4Z6-N6azixKM4",
             authDomain: "voiced-17b99.firebaseapp.com",
             projectId: "voiced-17b99",
             storageBucket: "voiced-17b99.firebasestorage.app",
             messagingSenderId: "179870092420",
-            appId: "1:179870092420:web:53536a4b7ffc34030006d1",
-            measurementId: "G-QVZG686LPN"
+            appId: "1:179870092420:web:53536a4b7ffc34030006d1"
         };
 
         // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const analytics = firebase.analytics();
 
-        // Настройка языка для SMS
-        auth.languageCode = 'ru';
-
-        // Переменные для хранения данных
+        // Переменные
         let confirmationResult = null;
-        let selectedPhoneNumber = '';
         let resendTimeout = null;
         let canResend = true;
+        let currentRoom = null;
+        let mockRooms = ['ABC123', 'XYZ789', 'TEST42'];
 
-        // Утилиты
+        // Проверка состояния авторизации
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                showRoomsPage(user);
+                document.getElementById('userAccount').style.display = 'flex';
+                
+                const avatar = document.getElementById('userAvatar');
+                const userName = document.getElementById('userName');
+                const userPhone = document.getElementById('userPhone');
+                
+                if (user.displayName) {
+                    avatar.textContent = user.displayName.charAt(0).toUpperCase();
+                    userName.textContent = user.displayName;
+                } else if (user.phoneNumber) {
+                    avatar.textContent = '📱';
+                    userName.textContent = 'Телефон';
+                } else {
+                    avatar.textContent = '👤';
+                    userName.textContent = 'Пользователь';
+                }
+                
+                userPhone.textContent = user.phoneNumber || user.email || '';
+            } else {
+                showLoginPage();
+                document.getElementById('userAccount').style.display = 'none';
+            }
+        });
+
+        function showRoomsPage(user) {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('roomsPage').style.display = 'flex';
+            document.getElementById('roomPage').style.display = 'none';
+        }
+
+        function showLoginPage() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('roomsPage').style.display = 'none';
+            document.getElementById('roomPage').style.display = 'none';
+        }
+
+        function showRoomPage(room) {
+            currentRoom = room;
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('roomsPage').style.display = 'none';
+            document.getElementById('roomPage').style.display = 'block';
+            
+            document.getElementById('currentRoomName').textContent = room.name || 'Новая комната';
+            document.getElementById('currentRoomId').textContent = `ID: ${room.id}`;
+            
+            addMessage({
+                author: 'Система',
+                text: `Добро пожаловать в комнату ${room.name || room.id}!`,
+                time: new Date().toLocaleTimeString()
+            });
+            
+            updateMembersList();
+        }
+
+        function leaveRoom() {
+            currentRoom = null;
+            document.getElementById('roomPage').style.display = 'none';
+            document.getElementById('roomsPage').style.display = 'flex';
+            document.getElementById('chatMessages').innerHTML = '';
+        }
+
+        function addMessage(message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.innerHTML = `
+                <div class="message-avatar">${message.author.charAt(0).toUpperCase()}</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-author">${message.author}</span>
+                        <span class="message-time">${message.time}</span>
+                    </div>
+                    <div class="message-text">${message.text}</div>
+                </div>
+            `;
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (text && auth.currentUser) {
+                addMessage({
+                    author: auth.currentUser.displayName || auth.currentUser.phoneNumber || 'Пользователь',
+                    text: text,
+                    time: new Date().toLocaleTimeString()
+                });
+                input.value = '';
+            }
+        }
+
+        function openEmojiPicker() {
+            showNotification('Выбор эмодзи (демо)', 'info');
+        }
+
+        function attachFile() {
+            showNotification('Прикрепление файлов (демо)', 'info');
+        }
+
+        function updateMembersList() {
+            const membersList = document.getElementById('membersList');
+            const membersCount = document.getElementById('membersCount');
+            
+            membersList.innerHTML = '';
+            
+            if (auth.currentUser) {
+                const memberElement = document.createElement('div');
+                memberElement.className = 'member-item';
+                memberElement.innerHTML = `
+                    <div class="member-avatar">
+                        ${(auth.currentUser.displayName || 'U').charAt(0).toUpperCase()}
+                        <span class="member-status status-online"></span>
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">${auth.currentUser.displayName || auth.currentUser.phoneNumber || 'Пользователь'}</div>
+                        <div class="member-role">Владелец</div>
+                    </div>
+                `;
+                membersList.appendChild(memberElement);
+            }
+            
+            membersCount.textContent = membersList.children.length;
+        }
+
         function showNotification(message, type = 'info') {
             const notification = document.getElementById('notification');
             notification.style.display = 'block';
@@ -720,24 +1721,17 @@
             }
         }
 
-        // Управление модальными окнами
         function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            }
+            document.getElementById(modalId).classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = '';
-                
-                if (modalId === 'phoneModal') {
-                    resetPhoneModal();
-                }
+            document.getElementById(modalId).classList.remove('show');
+            document.body.style.overflow = '';
+            
+            if (modalId === 'phoneModal') {
+                resetPhoneModal();
             }
         }
 
@@ -754,18 +1748,12 @@
             
             if (resendTimeout) {
                 clearInterval(resendTimeout);
-                const resendLink = document.getElementById('resendLink');
-                resendLink.textContent = 'Отправить снова';
-                resendLink.classList.remove('disabled');
+                document.getElementById('resendLink').textContent = 'Отправить снова';
+                document.getElementById('resendLink').classList.remove('disabled');
                 canResend = true;
             }
-            
-            confirmationResult = null;
-            setLoading('sendCodeBtn', false);
-            setLoading('verifyBtn', false);
         }
 
-        // Форматирование номера телефона
         document.getElementById('phoneInput')?.addEventListener('input', function(e) {
             let x = e.target.value.replace(/\D/g, '');
             
@@ -775,23 +1763,14 @@
             x = x.substring(0, 11);
             
             let formatted = '+7';
-            if (x.length > 1) {
-                formatted += ' (' + x.substring(1, Math.min(4, x.length));
-            }
-            if (x.length >= 4) {
-                formatted += ') ' + x.substring(4, Math.min(7, x.length));
-            }
-            if (x.length >= 7) {
-                formatted += '-' + x.substring(7, Math.min(9, x.length));
-            }
-            if (x.length >= 9) {
-                formatted += '-' + x.substring(9, 11);
-            }
+            if (x.length > 1) formatted += ' (' + x.substring(1, Math.min(4, x.length));
+            if (x.length >= 4) formatted += ') ' + x.substring(4, Math.min(7, x.length));
+            if (x.length >= 7) formatted += '-' + x.substring(7, Math.min(9, x.length));
+            if (x.length >= 9) formatted += '-' + x.substring(9, 11);
             
             e.target.value = formatted;
         });
 
-        // Обработка ввода кода
         function handleCodeInput(input, event) {
             input.classList.remove('error');
             
@@ -812,53 +1791,37 @@
             }
         }
 
-        // Google вход
         function signInWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             
             auth.signInWithPopup(provider)
-                .then((result) => {
-                    const user = result.user;
-                    showNotification(`Добро пожаловать, ${user.displayName || 'пользователь'}!`, 'success');
-                })
                 .catch((error) => {
                     console.error('Google login error:', error);
-                    showNotification('Ошибка входа через Google: ' + error.message, 'error');
+                    showNotification('Ошибка: ' + error.message, 'error');
                 });
         }
 
-        // Инициализация reCAPTCHA
-        function initializeRecaptcha() {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(auth, 'sendCodeBtn', {
-                    size: 'invisible',
-                    callback: (response) => {
-                        // reCAPTCHA решена
-                    }
-                });
-            }
-        }
-
-        // Отправка кода на телефон
         function sendPhoneCode() {
-            initializeRecaptcha();
-            
             const phoneInput = document.getElementById('phoneInput');
             const phone = phoneInput.value.trim();
             const phoneDigits = phone.replace(/\D/g, '');
             
             if (phoneDigits.length < 11) {
                 phoneInput.classList.add('error');
-                showNotification('Введите полный номер телефона', 'error');
+                showNotification('Введите полный номер', 'error');
                 return;
             }
             
             setLoading('sendCodeBtn', true);
             
             const formattedPhone = '+' + phoneDigits;
-            selectedPhoneNumber = phone;
             
-            auth.signInWithPhoneNumber(formattedPhone, window.recaptchaVerifier)
+            const recaptchaVerifier = new firebase.auth.RecaptchaVerifier(auth, 'recaptcha-container', {
+                size: 'normal',
+                callback: () => {}
+            });
+            
+            auth.signInWithPhoneNumber(formattedPhone, recaptchaVerifier)
                 .then((result) => {
                     confirmationResult = result;
                     setLoading('sendCodeBtn', false);
@@ -886,19 +1849,12 @@
                     showNotification('Код отправлен!', 'success');
                 })
                 .catch((error) => {
-                    console.error('SMS send error:', error);
+                    console.error('SMS error:', error);
                     setLoading('sendCodeBtn', false);
                     phoneInput.classList.add('error');
+                    showNotification('Ошибка: ' + error.message, 'error');
                     
-                    if (error.code === 'auth/invalid-phone-number') {
-                        showNotification('Неверный формат номера', 'error');
-                    } else if (error.code === 'auth/too-many-requests') {
-                        showNotification('Слишком много попыток. Попробуйте позже', 'error');
-                    } else if (error.code === 'auth/quota-exceeded') {
-                        showNotification('Превышен лимит отправки SMS. Попробуйте позже', 'error');
-                    } else {
-                        showNotification('Ошибка отправки кода: ' + error.message, 'error');
-                    }
+                    recaptchaVerifier.clear();
                 });
         }
 
@@ -924,33 +1880,31 @@
         }
 
         function resendCode() {
-            if (!canResend) return;
-            
-            if (confirmationResult) {
+            if (canResend) {
                 sendPhoneCode();
             }
         }
 
         function verifyCode() {
+            if (!confirmationResult) {
+                showNotification('Сначала отправьте код', 'error');
+                return;
+            }
+            
             const codeInputs = document.querySelectorAll('.code-input');
             let code = '';
             let isValid = true;
             
             codeInputs.forEach(input => {
-                if (input.value.length === 0) {
+                if (!input.value) {
                     input.classList.add('error');
                     isValid = false;
                 }
                 code += input.value;
             });
             
-            if (!isValid) {
-                showNotification('Введите полный код', 'error');
-                return;
-            }
-            
-            if (code.length !== 4) {
-                showNotification('Код должен содержать 4 цифры', 'error');
+            if (!isValid || code.length !== 4) {
+                showNotification('Введите код полностью', 'error');
                 return;
             }
             
@@ -958,24 +1912,16 @@
             
             confirmationResult.confirm(code)
                 .then((result) => {
-                    const user = result.user;
                     setLoading('verifyBtn', false);
-                    showNotification(`Добро пожаловать, ${user.phoneNumber}!`, 'success');
                     closeModal('phoneModal');
                 })
                 .catch((error) => {
-                    console.error('Code verification error:', error);
+                    console.error('Verification error:', error);
                     setLoading('verifyBtn', false);
-                    
                     document.querySelectorAll('.code-input').forEach(input => {
                         input.classList.add('error');
                     });
-                    
-                    if (error.code === 'auth/invalid-verification-code') {
-                        showNotification('Неверный код', 'error');
-                    } else {
-                        showNotification('Ошибка подтверждения: ' + error.message, 'error');
-                    }
+                    showNotification('Неверный код', 'error');
                 });
         }
 
@@ -986,20 +1932,12 @@
             setTimeout(() => {
                 codeStep.classList.add('hidden');
                 codeStep.style.opacity = '1';
-                
-                const phoneStep = document.getElementById('phoneStep');
-                phoneStep.classList.remove('hidden');
-                
-                document.querySelectorAll('.code-input').forEach(input => {
-                    input.value = '';
-                    input.classList.remove('error');
-                });
+                document.getElementById('phoneStep').classList.remove('hidden');
                 
                 if (resendTimeout) {
                     clearInterval(resendTimeout);
-                    const resendLink = document.getElementById('resendLink');
-                    resendLink.textContent = 'Отправить снова';
-                    resendLink.classList.remove('disabled');
+                    document.getElementById('resendLink').textContent = 'Отправить снова';
+                    document.getElementById('resendLink').classList.remove('disabled');
                     canResend = true;
                 }
             }, 300);
@@ -1018,18 +1956,132 @@
             document.getElementById('micContainer').classList.toggle('mic-muted');
         }
 
-        // Закрытие по клику на фон
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal-overlay')) {
-                closeModal(event.target.id);
+        function openJoinRoomModal() {
+            openModal('joinRoomModal');
+            document.getElementById('roomIdJoin').value = '';
+            document.getElementById('roomIdJoin').classList.remove('error');
+        }
+
+        function openCreateRoomModal() {
+            generateRoomId();
+            openModal('createRoomModal');
+        }
+
+        function previewRoomAvatar(input) {
+            const preview = document.getElementById('roomAvatarPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+                };
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // Обработчики для крестиков
+        function generateRoomId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let id = '';
+            for (let i = 0; i < 6; i++) {
+                id += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('roomId').value = id;
+        }
+
+        function copyRoomId() {
+            const roomId = document.getElementById('roomId').value;
+            navigator.clipboard.writeText(roomId).then(() => {
+                showNotification('ID скопирован!', 'success');
+            }).catch(() => {
+                showNotification('Ошибка копирования', 'error');
+            });
+        }
+
+        function createRoom() {
+            const roomName = document.getElementById('roomName').value;
+            const roomDescription = document.getElementById('roomDescription').value;
+            const maxPlayers = document.getElementById('roomMaxPlayers').value;
+            const roomType = document.getElementById('roomType').value;
+            const roomId = document.getElementById('roomId').value;
+            
+            if (!roomName) {
+                showNotification('Введите название комнаты', 'error');
+                return;
+            }
+            
+            const roomData = {
+                id: roomId,
+                name: roomName,
+                description: roomDescription,
+                maxPlayers: maxPlayers,
+                type: roomType,
+                createdAt: new Date().toISOString(),
+                createdBy: auth.currentUser?.uid
+            };
+            
+            console.log('Создана комната:', roomData);
+            
+            mockRooms.push(roomId);
+            
+            showNotification(`Комната "${roomName}" создана!`, 'success');
+            closeModal('createRoomModal');
+            
+            showRoomPage(roomData);
+            
+            document.getElementById('roomName').value = '';
+            document.getElementById('roomDescription').value = '';
+            document.getElementById('roomAvatarPreview').innerHTML = '<i class="fas fa-image"></i>';
+        }
+
+        function joinRoom() {
+            const roomIdInput = document.getElementById('roomIdJoin');
+            const roomId = roomIdInput.value.trim().toUpperCase();
+            
+            if (roomId.length !== 6) {
+                roomIdInput.classList.add('error');
+                showNotification('ID должен содержать 6 символов', 'error');
+                return;
+            }
+            
+            if (mockRooms.includes(roomId)) {
+                showNotification(`Вход в комнату ${roomId}`, 'success');
+                closeModal('joinRoomModal');
+                roomIdInput.classList.remove('error');
+                
+                showRoomPage({
+                    id: roomId,
+                    name: `Комната ${roomId}`
+                });
+            } else {
+                roomIdInput.classList.add('error');
+                showNotification('Комната не найдена', 'error');
+            }
+        }
+
+        function logout() {
+            auth.signOut()
+                .then(() => {
+                    showNotification('Вы вышли из аккаунта', 'info');
+                })
+                .catch((error) => {
+                    showNotification('Ошибка при выходе', 'error');
+                });
+        }
+
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        window.onclick = (event) => {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal(event.target.id);
+            }
+        };
+
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', function() {
-                const modal = this.closest('.modal-overlay');
-                closeModal(modal.id);
+                closeModal(this.closest('.modal-overlay').id);
             });
         });
     </script>
