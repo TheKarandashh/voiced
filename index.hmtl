@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voiced — Вход</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Firebase SDK (Compat version для простоты) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #0a0a0c;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: #111214;
+            width: 100%;
+            max-width: 1000px;
+            min-height: 600px;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .brand-section {
+            flex: 1;
+            background: linear-gradient(145deg, #0d0f11 0%, #1a1c20 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 32px;
+            text-align: center;
+            border-right: 1px solid #2a2d33;
+        }
+
+        .mic-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 32px;
+            cursor: pointer;
+        }
+
+        .brand-section i {
+            font-size: 120px;
+            color: #10b981;
+            background: transparent;
+            padding: 0;
+            border: none;
+            transition: color 0.5s ease;
+            display: block;
+        }
+
+        .mic-container.mic-muted i {
+            color: #ef4444;
+        }
+
+        .strike-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .strike-line svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .strike-line path {
+            stroke: #ef4444;
+            stroke-width: 10;
+            stroke-linecap: round;
+            fill: none;
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            transition: stroke-dashoffset 0.6s ease-in-out;
+        }
+
+        .mic-container.mic-muted .strike-line path {
+            stroke-dashoffset: 0;
+        }
+
+        .brand-section h1 {
+            font-size: 72px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .brand-section h1 span {
+            color: #10b981;
+        }
+
+        .brand-tagline {
+            color: #8e9297;
+            font-size: 18px;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        .auth-section {
+            flex: 1;
+            background-color: #0c0d0f;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 48px 40px;
+        }
+
+        .welcome-text {
+            font-size: 32px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .welcome-subtext {
+            color: #8e9297;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background-color: #1e1f24;
+            border: 2px solid #3a3c44;
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 16px 24px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .auth-btn i {
+            font-size: 24px;
+            width: 28px;
+        }
+
+        .fa-google {
+            color: #ea4335;
+        }
+
+        .fa-phone-alt {
+            color: #10b981;
+        }
+
+        .auth-btn:hover {
+            background-color: #2a2c33;
+            border-color: #10b981;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.3);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #5a5f66;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #2d2f36;
+        }
+
+        .divider span {
+            margin: 0 16px;
+        }
+
+        .footer-links {
+            margin-top: 20px;
+            text-align: center;
+            color: #5a5f66;
+            font-size: 13px;
+        }
+
+        .footer-links a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Модальные окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #1a1c20;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 28px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+            border: 1px solid #2d2f36;
+            position: relative;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        .close-icon {
+            display: inline-block;
+            font-size: 40px;
+            color: #8e9297;
+            transition: color 0.3s;
+            line-height: 1;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+        }
+
+        .modal-close:hover .close-icon {
+            color: #10b981;
+            animation: spinCross 0.5s ease;
+        }
+
+        @keyframes spinCross {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal-body {
+            padding: 32px;
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 28px;
+            margin-bottom: 24px;
+            font-weight: 600;
+            padding-right: 30px;
+        }
+
+        .modal-title span {
+            color: #10b981;
+        }
+
+        .modal-title.center {
+            text-align: center;
+            padding-right: 0;
+        }
+
+        .step {
+            transition: opacity 0.3s ease;
+        }
+
+        .step.hidden {
+            display: none;
+        }
+
+        .phone-input-container {
+            margin-bottom: 24px;
+        }
+
+        .phone-input-label {
+            color: #b5bac1;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .phone-input-field {
+            width: 100%;
+            padding: 16px 18px;
+            background-color: #1e1f24;
+            border: 2px solid #3a3c44;
+            border-radius: 16px;
+            color: white;
+            font-size: 18px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .phone-input-field:focus {
+            border-color: #10b981;
+        }
+
+        .phone-input-field::placeholder {
+            color: #5a5f66;
+        }
+
+        .phone-input-field.error {
+            border-color: #ef4444;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .code-input-container {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .code-phone-display {
+            color: #10b981;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding: 12px;
+            background-color: rgba(16, 185, 129, 0.1);
+            border-radius: 40px;
+            text-align: center;
+        }
+
+        .code-inputs {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .code-input {
+            width: 65px;
+            height: 75px;
+            background-color: #1e1f24;
+            border: 2px solid #3a3c44;
+            border-radius: 16px;
+            color: white;
+            font-size: 36px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .code-input:focus {
+            border-color: #10b981;
+        }
+
+        .code-input.error {
+            border-color: #ef4444;
+            color: #ef4444;
+            animation: shake 0.3s ease;
+        }
+
+        .code-resend {
+            color: #8e9297;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .code-resend a {
+            color: #10b981;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .code-resend a:hover {
+            text-decoration: underline;
+        }
+
+        .code-resend a.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background-color: #0d9e6b;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #8e9297;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #10b981;
+        }
+
+        .back-link i {
+            font-size: 16px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .notification.success {
+            background-color: #10b981;
+        }
+
+        .notification.error {
+            background-color: #ef4444;
+        }
+
+        .notification.info {
+            background-color: #3b82f6;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .login-card {
+                flex-direction: column;
+                max-width: 500px;
+            }
+            
+            .brand-section {
+                border-right: none;
+                border-bottom: 1px solid #2a2d33;
+                padding: 40px 20px;
+            }
+            
+            .brand-section i {
+                font-size: 80px;
+            }
+
+            .mic-container {
+                margin-bottom: 20px;
+            }
+            
+            .brand-section h1 {
+                font-size: 56px;
+            }
+
+            .code-input {
+                width: 55px;
+                height: 65px;
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="brand-section">
+            <div id="micContainer" class="mic-container" onclick="toggleMic()">
+                <i class="fas fa-microphone-alt"></i>
+                <div class="strike-line">
+                    <svg viewBox="0 0 120 120" preserveAspectRatio="none">
+                        <path d="M 10 10 L 110 110" />
+                    </svg>
+                </div>
+            </div>
+            <h1>Voiced<span>.</span></h1>
+            <div class="brand-tagline">
+                Приватность. Удобность. Функциональность.
+            </div>
+        </div>
+
+        <div class="auth-section">
+            <div class="welcome-text">Добро пожаловать</div>
+            <div class="welcome-subtext">Выберите способ входа, чтобы продолжить</div>
+
+            <div class="auth-buttons">
+                <button class="auth-btn" onclick="signInWithGoogle()">
+                    <i class="fab fa-google"></i> Google
+                </button>
+                <div class="divider"><span>или</span></div>
+                <button class="auth-btn" onclick="openPhoneModal()">
+                    <i class="fas fa-phone-alt"></i> Номер телефона
+                </button>
+            </div>
+
+            <div class="footer-links">
+                <span>Нажимая «Войти», Вы принимаете <a onclick="openTermsModal()">условия</a></span>
+                <br>
+                <span style="font-size: 12px;">© Voiced 2025</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно с условиями -->
+    <div id="termsModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close"><span class="close-icon">×</span></button>
+            <div class="modal-body">
+                <h2 class="modal-title">Условия использования <span>Voiced</span></h2>
+                <div style="color: #b5bac1; font-size: 15px; line-height: 1.7; max-height: 400px; overflow-y: auto; margin-bottom: 24px; padding-right: 10px;">
+                    <p><strong>1. Конфиденциальность и запись голоса</strong><br>Voiced гарантирует, что все голосовые данные передаются в зашифрованном виде. Мы не храним записи разговоров и не передаём их третьим лицам.</p>
+                    <p><strong>2. Правила поведения в голосовых каналах</strong><br>Запрещены спам, троллинг, распространение вредоносных ссылок, а также использование нецензурной лексики в публичных каналах.</p>
+                    <p><strong>3. Безопасность аккаунта</strong><br>Вы несёте ответственность за сохранность данных для входа.</p>
+                    <p><strong>4. Изменение условий</strong><br>Администрация может обновлять этот документ, уведомляя пользователей через уведомление на сайте.</p>
+                </div>
+                <button class="submit-btn" onclick="closeModal('termsModal')">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно телефона -->
+    <div id="phoneModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close"><span class="close-icon">×</span></button>
+            <div class="modal-body">
+                <!-- Шаг 1: Ввод номера -->
+                <div id="phoneStep" class="step">
+                    <h2 class="modal-title">Вход по <span>телефону</span></h2>
+                    <div class="phone-input-container">
+                        <label class="phone-input-label">Номер телефона</label>
+                        <input type="tel" id="phoneInput" class="phone-input-field" placeholder="+7 (___) ___-__-__" value="+7 " autocomplete="off">
+                    </div>
+                    <button class="submit-btn" onclick="sendPhoneCode()" id="sendCodeBtn">Отправить код</button>
+                </div>
+
+                <!-- Шаг 2: Ввод кода -->
+                <div id="codeStep" class="step hidden">
+                    <div class="back-link" onclick="backToPhone()">
+                        <i class="fas fa-arrow-left"></i> Изменить номер
+                    </div>
+                    <h2 class="modal-title center">Введите <span>код</span></h2>
+                    <div class="code-input-container">
+                        <div class="code-phone-display" id="displayPhoneNumber"></div>
+                        <div class="code-inputs">
+                            <input type="text" class="code-input" maxlength="1" onkeyup="handleCodeInput(this, event)" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="handleCodeKeyDown(this, event)">
+                            <input type="text" class="code-input" maxlength="1" onkeyup="handleCodeInput(this, event)" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="handleCodeKeyDown(this, event)">
+                            <input type="text" class="code-input" maxlength="1" onkeyup="handleCodeInput(this, event)" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="handleCodeKeyDown(this, event)">
+                            <input type="text" class="code-input" maxlength="1" onkeyup="handleCodeInput(this, event)" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeydown="handleCodeKeyDown(this, event)">
+                        </div>
+                        <div class="code-resend">
+                            Не пришёл код? <a id="resendLink" onclick="resendCode()">Отправить снова</a>
+                        </div>
+                    </div>
+                    <button class="submit-btn" onclick="verifyCode()" id="verifyBtn">Подтвердить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" style="display: none;"></div>
+
+    <script>
+        // Firebase конфигурация (ваша)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBzkawq3-nfIsswtXD2zR4Z6-N6azixKM4",
+            authDomain: "voiced-17b99.firebaseapp.com",
+            projectId: "voiced-17b99",
+            storageBucket: "voiced-17b99.firebasestorage.app",
+            messagingSenderId: "179870092420",
+            appId: "1:179870092420:web:53536a4b7ffc34030006d1",
+            measurementId: "G-QVZG686LPN"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const analytics = firebase.analytics();
+
+        // Настройка языка для SMS
+        auth.languageCode = 'ru';
+
+        // Переменные для хранения данных
+        let confirmationResult = null;
+        let selectedPhoneNumber = '';
+        let resendTimeout = null;
+        let canResend = true;
+
+        // Утилиты
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.style.display = 'block';
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function setLoading(buttonId, isLoading) {
+            const btn = document.getElementById(buttonId);
+            if (!btn) return;
+            
+            if (isLoading) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading"></span>';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = btn.id === 'sendCodeBtn' ? 'Отправить код' : 'Подтвердить';
+            }
+        }
+
+        // Управление модальными окнами
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+                
+                if (modalId === 'phoneModal') {
+                    resetPhoneModal();
+                }
+            }
+        }
+
+        function resetPhoneModal() {
+            document.getElementById('phoneStep').classList.remove('hidden');
+            document.getElementById('codeStep').classList.add('hidden');
+            document.getElementById('phoneInput').value = '+7 ';
+            
+            document.querySelectorAll('.code-input').forEach(input => {
+                input.value = '';
+                input.classList.remove('error');
+            });
+            document.getElementById('phoneInput').classList.remove('error');
+            
+            if (resendTimeout) {
+                clearInterval(resendTimeout);
+                const resendLink = document.getElementById('resendLink');
+                resendLink.textContent = 'Отправить снова';
+                resendLink.classList.remove('disabled');
+                canResend = true;
+            }
+            
+            confirmationResult = null;
+            setLoading('sendCodeBtn', false);
+            setLoading('verifyBtn', false);
+        }
+
+        // Форматирование номера телефона
+        document.getElementById('phoneInput')?.addEventListener('input', function(e) {
+            let x = e.target.value.replace(/\D/g, '');
+            
+            if (x.startsWith('8')) x = '7' + x.substring(1);
+            if (!x.startsWith('7') && x.length > 0) x = '7' + x;
+            
+            x = x.substring(0, 11);
+            
+            let formatted = '+7';
+            if (x.length > 1) {
+                formatted += ' (' + x.substring(1, Math.min(4, x.length));
+            }
+            if (x.length >= 4) {
+                formatted += ') ' + x.substring(4, Math.min(7, x.length));
+            }
+            if (x.length >= 7) {
+                formatted += '-' + x.substring(7, Math.min(9, x.length));
+            }
+            if (x.length >= 9) {
+                formatted += '-' + x.substring(9, 11);
+            }
+            
+            e.target.value = formatted;
+        });
+
+        // Обработка ввода кода
+        function handleCodeInput(input, event) {
+            input.classList.remove('error');
+            
+            if (input.value.length === 1) {
+                const next = input.parentElement.querySelectorAll('.code-input')[Array.from(input.parentElement.children).indexOf(input) + 1];
+                if (next) next.focus();
+            }
+        }
+
+        function handleCodeKeyDown(input, event) {
+            if (event.key === 'Backspace' && input.value.length === 0) {
+                const prev = input.parentElement.querySelectorAll('.code-input')[Array.from(input.parentElement.children).indexOf(input) - 1];
+                if (prev) {
+                    prev.focus();
+                    prev.value = '';
+                    prev.classList.remove('error');
+                }
+            }
+        }
+
+        // Google вход
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
+                    showNotification(`Добро пожаловать, ${user.displayName || 'пользователь'}!`, 'success');
+                })
+                .catch((error) => {
+                    console.error('Google login error:', error);
+                    showNotification('Ошибка входа через Google: ' + error.message, 'error');
+                });
+        }
+
+        // Инициализация reCAPTCHA
+        function initializeRecaptcha() {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(auth, 'sendCodeBtn', {
+                    size: 'invisible',
+                    callback: (response) => {
+                        // reCAPTCHA решена
+                    }
+                });
+            }
+        }
+
+        // Отправка кода на телефон
+        function sendPhoneCode() {
+            initializeRecaptcha();
+            
+            const phoneInput = document.getElementById('phoneInput');
+            const phone = phoneInput.value.trim();
+            const phoneDigits = phone.replace(/\D/g, '');
+            
+            if (phoneDigits.length < 11) {
+                phoneInput.classList.add('error');
+                showNotification('Введите полный номер телефона', 'error');
+                return;
+            }
+            
+            setLoading('sendCodeBtn', true);
+            
+            const formattedPhone = '+' + phoneDigits;
+            selectedPhoneNumber = phone;
+            
+            auth.signInWithPhoneNumber(formattedPhone, window.recaptchaVerifier)
+                .then((result) => {
+                    confirmationResult = result;
+                    setLoading('sendCodeBtn', false);
+                    
+                    document.getElementById('displayPhoneNumber').textContent = phone;
+                    
+                    const phoneStep = document.getElementById('phoneStep');
+                    phoneStep.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        phoneStep.classList.add('hidden');
+                        phoneStep.style.opacity = '1';
+                        
+                        const codeStep = document.getElementById('codeStep');
+                        codeStep.classList.remove('hidden');
+                        codeStep.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            codeStep.style.opacity = '1';
+                            document.querySelector('.code-input')?.focus();
+                            startResendTimer();
+                        }, 50);
+                    }, 300);
+                    
+                    showNotification('Код отправлен!', 'success');
+                })
+                .catch((error) => {
+                    console.error('SMS send error:', error);
+                    setLoading('sendCodeBtn', false);
+                    phoneInput.classList.add('error');
+                    
+                    if (error.code === 'auth/invalid-phone-number') {
+                        showNotification('Неверный формат номера', 'error');
+                    } else if (error.code === 'auth/too-many-requests') {
+                        showNotification('Слишком много попыток. Попробуйте позже', 'error');
+                    } else if (error.code === 'auth/quota-exceeded') {
+                        showNotification('Превышен лимит отправки SMS. Попробуйте позже', 'error');
+                    } else {
+                        showNotification('Ошибка отправки кода: ' + error.message, 'error');
+                    }
+                });
+        }
+
+        function startResendTimer() {
+            canResend = false;
+            const resendLink = document.getElementById('resendLink');
+            let seconds = 30;
+            
+            resendLink.textContent = `Отправить снова (${seconds}с)`;
+            resendLink.classList.add('disabled');
+            
+            resendTimeout = setInterval(() => {
+                seconds--;
+                if (seconds > 0) {
+                    resendLink.textContent = `Отправить снова (${seconds}с)`;
+                } else {
+                    clearInterval(resendTimeout);
+                    resendLink.textContent = 'Отправить снова';
+                    resendLink.classList.remove('disabled');
+                    canResend = true;
+                }
+            }, 1000);
+        }
+
+        function resendCode() {
+            if (!canResend) return;
+            
+            if (confirmationResult) {
+                sendPhoneCode();
+            }
+        }
+
+        function verifyCode() {
+            const codeInputs = document.querySelectorAll('.code-input');
+            let code = '';
+            let isValid = true;
+            
+            codeInputs.forEach(input => {
+                if (input.value.length === 0) {
+                    input.classList.add('error');
+                    isValid = false;
+                }
+                code += input.value;
+            });
+            
+            if (!isValid) {
+                showNotification('Введите полный код', 'error');
+                return;
+            }
+            
+            if (code.length !== 4) {
+                showNotification('Код должен содержать 4 цифры', 'error');
+                return;
+            }
+            
+            setLoading('verifyBtn', true);
+            
+            confirmationResult.confirm(code)
+                .then((result) => {
+                    const user = result.user;
+                    setLoading('verifyBtn', false);
+                    showNotification(`Добро пожаловать, ${user.phoneNumber}!`, 'success');
+                    closeModal('phoneModal');
+                })
+                .catch((error) => {
+                    console.error('Code verification error:', error);
+                    setLoading('verifyBtn', false);
+                    
+                    document.querySelectorAll('.code-input').forEach(input => {
+                        input.classList.add('error');
+                    });
+                    
+                    if (error.code === 'auth/invalid-verification-code') {
+                        showNotification('Неверный код', 'error');
+                    } else {
+                        showNotification('Ошибка подтверждения: ' + error.message, 'error');
+                    }
+                });
+        }
+
+        function backToPhone() {
+            const codeStep = document.getElementById('codeStep');
+            codeStep.style.opacity = '0';
+            
+            setTimeout(() => {
+                codeStep.classList.add('hidden');
+                codeStep.style.opacity = '1';
+                
+                const phoneStep = document.getElementById('phoneStep');
+                phoneStep.classList.remove('hidden');
+                
+                document.querySelectorAll('.code-input').forEach(input => {
+                    input.value = '';
+                    input.classList.remove('error');
+                });
+                
+                if (resendTimeout) {
+                    clearInterval(resendTimeout);
+                    const resendLink = document.getElementById('resendLink');
+                    resendLink.textContent = 'Отправить снова';
+                    resendLink.classList.remove('disabled');
+                    canResend = true;
+                }
+            }, 300);
+        }
+
+        function openPhoneModal() {
+            resetPhoneModal();
+            openModal('phoneModal');
+        }
+
+        function openTermsModal() {
+            openModal('termsModal');
+        }
+
+        function toggleMic() {
+            document.getElementById('micContainer').classList.toggle('mic-muted');
+        }
+
+        // Закрытие по клику на фон
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal(event.target.id);
+            }
+        }
+
+        // Обработчики для крестиков
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const modal = this.closest('.modal-overlay');
+                closeModal(modal.id);
+            });
+        });
+    </script>
+</body>
+</html>
