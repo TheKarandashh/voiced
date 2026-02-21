@@ -4238,9 +4238,17 @@
         // Переключение панели каналов
         function toggleChannelsPanel() {
             const panel = document.getElementById('channelsPanel');
-            panel.classList.toggle('collapsed');
             const icon = panel.querySelector('.channels-toggle i');
-            icon.className = panel.classList.contains('collapsed') ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+            panel.classList.toggle('collapsed');
+            
+            if (panel.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-right';
+                // Исправляем баг с отображением при сворачивании
+                document.getElementById('chatPanel').style.width = '100%';
+            } else {
+                icon.className = 'fas fa-chevron-left';
+                document.getElementById('chatPanel').style.width = '';
+            }
         }
 
         // Показать информацию о комнате
@@ -4493,11 +4501,21 @@
             categories = [];
             members = [];
 
+            // Сначала скрываем всё
             document.getElementById('roomPage').style.display = 'none';
             document.getElementById('roomsPage').style.display = 'flex';
+            
+            // Принудительно сбрасываем стили, которые могли залипнуть
+            const chatPanel = document.getElementById('chatPanel');
+            if (chatPanel) chatPanel.style.display = 'flex';
+            
             document.getElementById('chatMessages').innerHTML = '';
             document.getElementById('voiceChatInterface').classList.remove('show');
             document.getElementById('voiceChatInfoBar').style.display = 'none';
+            
+            // Проверяем и сбрасываем состояние панелей
+            document.getElementById('channelsPanel').classList.remove('collapsed');
+            document.querySelectorAll('.members-panel').forEach(p => p.style.display = '');
         }
 
         // --- Голосовой чат ---
